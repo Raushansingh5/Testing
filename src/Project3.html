@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./output.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-800 flex items-center justify-center h-screen">
+ 
+
+    <div
+      class="bg-gray-700 text-black p-6 rounded-lg shadow-lg w-96 flex flex-col min-h-[250px] max-h-[500px] overflow-y-auto container mx-auto" 
+    >
+
+    <h1 class="text-3xl font-bold mb-4 text-center text-white">
+        Shopping List
+      </h1>
+      <h1 class="text-2xl font-bold mb-4 text-white">Products</h1>
+      <div id="product-list"></div>
+
+      <h2 class="text-xl font-bold mb-4 text-white">Shopping Cart</h2>
+      <div id="cart-items">
+        <p id="empty-cart" class="text-white">Your cart is empty</p>
+      </div>
+
+      <div class="text-xl text-white hidden" id="cart-total">
+        <p>Total: <span id="total-price">$0.00</span></p>
+        <button id="checkout-btn" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-800 add-to-cart-btn">Checkout</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const products = [
+          { id: 1, name: "Product 1", price: 10.0 },
+          { id: 2, name: "Product 2", price: 15.5 },
+          { id: 3, name: "Product 3", price: 7.25 },
+          { id: 4, name: "Product 4", price: 20.0 },
+        ];
+
+        const cart = [];
+        const productList = document.getElementById("product-list");
+        const cartItems = document.getElementById("cart-items");
+        const emptyCart = document.getElementById("empty-cart");
+        const cartTotal = document.getElementById("cart-total");
+        const totalPrice = document.getElementById("total-price");
+        const checkoutBtn = document.getElementById("checkout-btn");
+
+        products.forEach((element) => {
+          const productDiv = document.createElement("div");
+          productDiv.className =
+            "flex justify-between items-center bg-gray-100 px-4 py-2 rounded-lg shadow mb-2";
+          productDiv.innerHTML = `
+                    <span>${element.name}</span>
+                    <span>$${element.price.toFixed(2)}</span>
+                    <button class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-800 add-to-cart-btn" data-id="${
+                      element.id
+                    }">Add to Cart</button>
+                `;
+          productList.appendChild(productDiv);
+        });
+
+        const addToCartButtons = document.querySelectorAll(".add-to-cart-btn");
+        addToCartButtons.forEach((button) => {
+          button.addEventListener("click", (event) => {
+            const productId = parseInt(event.target.dataset.id);
+            const product = products.find((p) => p.id === productId);
+            cart.push(product);
+            updateCart();
+          });
+        });
+
+        function updateCart() {
+          cartItems.innerHTML = "";
+          if (cart.length === 0) {
+            emptyCart.classList.remove("hidden");
+            cartTotal.classList.add("hidden");
+          } else {
+            emptyCart.classList.add("hidden");
+            cartTotal.classList.remove("hidden");
+            let total = 0;
+            cart.forEach((item) => {
+              const itemDiv = document.createElement("div");
+              itemDiv.className =
+                "flex justify-between items-center bg-gray-100 px-4 py-2 rounded-lg shadow mb-2";
+              itemDiv.innerHTML = `
+                        <span>${item.name}</span>
+                        <span>$${item.price.toFixed(2)}</span>
+                    `;
+              cartItems.appendChild(itemDiv);
+              total += item.price;
+            });
+            totalPrice.textContent = `$${total.toFixed(2)}`;
+          }
+
+        }
+
+        checkoutBtn.addEventListener("click", () => {
+          alert("Checkout successful!");
+          cart.length = 0; // Clear the cart
+          updateCart(); // Update the cart display
+        });
+
+      });
+    </script>
+  </body>
+</html>

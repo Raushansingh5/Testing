@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="./output.css" />
+  </head>
+  <body class="bg-gray-800 flex items-center justify-center h-screen">
+    <div
+      class="bg-gray-700 text-black p-6 rounded-lg shadow-lg w-96 flex flex-col min-h-[250px]"
+    >
+      <h1 class="text-xl font-bold mb-4 text-center text-white">Weather App</h1>
+      <div class="flex mb-4">
+        <input
+          type="text"
+          id="locationInput"
+          class="flex-grow border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none"
+          placeholder="Enter location"
+        />
+        <button
+          id="fetchBtn"
+          class="bg-blue-500 ml-1 text-white px-4 py-2 rounded-r-lg hover:bg-blue-600"
+        >
+          Fetch
+        </button>
+      </div>
+      <div id="weatherDisplay" class="text-white text-center hidden">
+        <h2 id="cityName" class="text-2xl font-bold"></h2>
+        <p id="temperature" class="text-2xl"></p>
+        <p id="description" class="text-lg"></p>
+      </div>
+      <p id="error-message" class="text-red-500 text-center hidden">
+        City not found, Please try again
+      </p>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const fetchBtn = document.getElementById("fetchBtn");
+        const locationInput = document.getElementById("locationInput");
+        const weatherDisplay = document.getElementById("weatherDisplay");
+        const cityName = document.getElementById("cityName");
+        const temperature = document.getElementById("temperature");
+        const description = document.getElementById("description");
+        const errorMessage = document.getElementById("error-message");
+
+        fetchBtn.addEventListener("click", function () {
+          const location = locationInput.value.trim();
+          if (location === "") {
+            errorMessage.textContent = "Please enter a location";
+            errorMessage.classList.remove("hidden");
+            weatherDisplay.classList.add("hidden");
+            return;
+          }
+
+          fetchWeather(location);
+        });
+
+        async function fetchWeather(location) {
+          const apiKey = "971b1b986d054ca790d93108252903"; // Replace with your actual API key
+          const apiUrl = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${location}`;
+
+          // Show loading state
+          cityName.textContent = "Loading...";
+          temperature.textContent = "";
+          description.textContent = "";
+          weatherDisplay.classList.remove("hidden");
+          errorMessage.classList.add("hidden");
+
+          try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+              throw new Error("City not found");
+            }
+            const data = await response.json();
+            cityName.textContent = data.location.name;
+            temperature.textContent = `${data.current.temp_c} °C`;
+            description.textContent = data.current.condition.text;
+            weatherDisplay.classList.remove("hidden");
+            errorMessage.classList.add("hidden");
+          } catch (error) {
+            console.error(error);
+            weatherDisplay.classList.add("hidden");
+            errorMessage.classList.remove("hidden");
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
