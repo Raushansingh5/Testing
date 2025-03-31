@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="./output.css" />
+  </head>
+  <body class="bg-gray-800 flex items-center justify-center h-screen">
+    <div
+      id="quiz-container"
+      class="bg-gray-700 text-black p-6 rounded-lg shadow-lg w-96 h-200 flex flex-col min-h-[250px] max-h-[500px] overflow-y-auto container mx-auto"
+    >
+      <h1 class="text-3xl font-bold mb-4 text-center text-white">Quiz App</h1>
+
+      <div id="question-container" class="mb-4 hidden">
+        <h2 class="text-xl font-bold mb-4 text-white" id="question-text"></h2>
+        <ul id="answer-list" class="flex flex-col gap-2"></ul>
+        <button
+          id="next-button"
+          class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-800 hidden mt-3"
+        >
+          Next
+        </button>
+      </div>
+
+      <div id="result-container" class="hidden">
+        <h2 class="text-xl font-bold mb-4 text-white">Result</h2>
+        <p id="score-text" class="text-white"></p>
+        <button
+          id="restart-btn"
+          class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-800 mt-4"
+        >
+          Restart Quiz
+        </button>
+      </div>
+
+      <button
+        id="start-btn"
+        class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-800"
+      >
+        Start Quiz
+      </button>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const questions = [
+          { question: "What is the capital of France?", answers: ["Delhi", "Paris", "Dubai", "London"], correct_ans: "Paris" },
+          { question: "What is the capital of India?", answers: ["Islamabad", "Japan", "Dubai", "Delhi"], correct_ans: "Delhi" },
+          { question: "What is the capital of Japan?", answers: ["Delhi", "Tokyo", "Dubai", "London"], correct_ans: "Tokyo" },
+          { question: "What is the capital of USA?", answers: ["Delhi", "Paris", "Washington DC", "London"], correct_ans: "Washington DC" },
+          { question: "What is the capital of China?", answers: ["Delhi", "Paris", "Beijing", "London"], correct_ans: "Beijing" },
+          { question: "What is the capital of UAE?", answers: ["Delhi", "Paris", "Dubai", "London"], correct_ans: "Dubai" },
+          { question: "What is the capital of UK?", answers: ["Delhi", "Paris", "Dubai", "London"], correct_ans: "London" }
+        ];
+
+        const startBtn = document.getElementById("start-btn");
+        const questionContainer = document.getElementById("question-container");
+        const questionText = document.getElementById("question-text");
+        const answerList = document.getElementById("answer-list");
+        const nextButton = document.getElementById("next-button");
+        const resultContainer = document.getElementById("result-container");
+        const restartBtn = document.getElementById("restart-btn");
+        const scoreText = document.getElementById("score-text");
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selected = false;
+
+        startBtn.addEventListener("click", startQuiz);
+        restartBtn.addEventListener("click", restartQuiz);
+        nextButton.addEventListener("click", nextQuestion);
+
+        function startQuiz() {
+          startBtn.classList.add("hidden");
+          questionContainer.classList.remove("hidden");
+          currentQuestionIndex = 0;
+          score = 0;
+          showQuestion();
+        }
+
+        function showQuestion() {
+          nextButton.classList.add("hidden");
+          selected = false;
+
+          const currentQuestion = questions[currentQuestionIndex];
+          questionText.textContent = currentQuestion.question;
+          answerList.innerHTML = ""; // Clear previous answers
+
+          currentQuestion.answers.forEach((answer) => {
+            const li = document.createElement("li");
+            li.className = "bg-gray-200 text-black px-4 py-2 rounded-lg shadow mb-2 cursor-pointer hover:bg-green-200 ";
+      
+            li.textContent = answer;
+
+            li.addEventListener("click", () => {
+              if (!selected) {
+                checkAnswer(li, answer);
+                selected = true;
+              }
+            });
+
+            answerList.appendChild(li);
+          });
+        }
+
+        function checkAnswer(selectedLi, selectedAnswer) {
+          const correctAnswer = questions[currentQuestionIndex].correct_ans.trim();
+          
+          if (selectedAnswer.trim() === correctAnswer) {
+            selectedLi.classList.add("bg-green-600", "text-red");
+            score++;
+          } else {
+            selectedLi.classList.add("bg-red-500", "text-white");
+            answerList.childNodes.forEach((li) => {
+              if (li.textContent.trim() === correctAnswer) {
+                li.classList.add("bg-green-500", "text-white");
+              }
+            });
+          }
+
+          answerList.childNodes.forEach((li) => li.classList.add("pointer-events-none"));
+          nextButton.classList.remove("hidden");
+        }
+
+        function nextQuestion() {
+          currentQuestionIndex++;
+          if (currentQuestionIndex < questions.length) {
+            showQuestion();
+          } else {
+            showResult();
+          }
+        }
+
+        function showResult() {
+          questionContainer.classList.add("hidden");
+          resultContainer.classList.remove("hidden");
+          scoreText.textContent = `Your score is ${score} out of ${questions.length}`;
+        }
+
+        function restartQuiz() {
+          resultContainer.classList.add("hidden");
+          startQuiz();
+        }
+      });
+    </script>
+  </body>
+</html>
