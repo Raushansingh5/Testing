@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="./output.css">
+</head>
+<body class="bg-gray-800 flex items-center justify-center h-screen">
+    
+    <div class="bg-gray-700 text-black p-6 rounded-lg shadow-lg w-196 flex flex-col min-h-[250px]">
+        <h2 class="text-white text-center text-4xl font-bold">Expense Tracker</h2>
+        
+        <div class="flex items-center mt-4 gap-x-4">
+            <input type="text" id="expenseInput" placeholder="Enter expense" class="p-2 rounded-lg border border-gray-300 focus:outline-none w-1/3"> 
+            <input type="number" id="amountInput" placeholder="Enter amount" class="p-2 rounded-lg border border-gray-300 focus:outline-none w-1/4">
+            <button id="addExpenseBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-auto">Add</button>
+        </div>
+
+        <div class="mt-4">
+            <h2 class="text-white text-2xl font-bold mt-4 text-center">Expenses</h2>
+            <ul id="expenseList" class="mt-2 max-h-[200px] overflow-y-auto"></ul>
+            <p id="empty-list" class="text-white">No expenses added yet.</p>
+        </div>
+
+        <p id="total" class="text-white text-2xl font-bold mt-4 text-center">Total: $0.00</p>
+        <button id="clearBtn" class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 mt-4 w-auto hidden">Clear All</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const addExpenseBtn = document.getElementById("addExpenseBtn");
+            const expenseInput = document.getElementById("expenseInput");
+            const amountInput = document.getElementById("amountInput");
+            const expenseList = document.getElementById("expenseList");
+            const totalDisplay = document.getElementById("total");
+            const clearBtn = document.getElementById("clearBtn");
+            const emptyList = document.getElementById("empty-list");
+
+            let total = 0;
+            let expenses = [];
+
+            // Load data from local storage
+            const loadFromLocalStorage = () => {
+                const storedExpenses = JSON.parse(localStorage.getItem("expenses")) || [];
+                const storedTotal = parseFloat(localStorage.getItem("total")) || 0;
+
+                expenses = storedExpenses;
+                total = storedTotal;
+
+                // Update the UI
+                expenses.forEach(({ expense, amount }) => addExpenseToUI(expense, amount));
+                totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+                if (expenses.length > 0) {
+                    emptyList.classList.add("hidden");
+                    clearBtn.classList.remove("hidden");
+                }
+            };
+
+            // Save data to local storage
+            const saveToLocalStorage = () => {
+                localStorage.setItem("expenses", JSON.stringify(expenses));
+                localStorage.setItem("total", total.toString());
+            };
+
+            // Add expense to the UI
+            const addExpenseToUI = (expense, amount) => {
+                const listItem = document.createElement("li");
+                listItem.className = "flex justify-between items-center bg-gray-100 px-4 py-2 rounded-lg shadow mb-2";
+                listItem.innerHTML = `
+                    <span>${expense}</span> 
+                    <span>$${amount.toFixed(2)}</span>
+                    <button class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-800 remove-btn" data-amount="${amount}">Remove</button>
+                `;
+                expenseList.appendChild(listItem);
+
+                // Remove an expense
+                listItem.querySelector(".remove-btn").addEventListener("click", () => {
+                    total -= amount;
+                    expenses = expenses.filter(e => e.expense !== expense || e.amount !== amount);
+                    listItem.remove();
+                    totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+                    saveToLocalStorage();
+                    if (expenses.length === 0) {
+                        emptyList.classList.remove("hidden");
+                        clearBtn.classList.add("hidden");
+                    }
+                });
+            };
+
+            // Add a new expense
+            addExpenseBtn.addEventListener("click", () => {
+                const expense = expenseInput.value.trim();
+                const amount = parseFloat(amountInput.value.trim());
+
+                if (expense === "" || isNaN(amount) || amount <= 0) {
+                    alert("Please enter a valid expense and amount.");
+                    return;
+                }
+
+                if (expenses.some(e => e.expense === expense && e.amount === amount)) {
+                    alert("This expense already exists.");
+                    return;
+                }
+
+                expenses.push({ expense, amount });
+                total += amount;
+
+                addExpenseToUI(expense, amount);
+
+                totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+                emptyList.classList.add("hidden");
+                clearBtn.classList.remove("hidden");
+
+                saveToLocalStorage();
+
+                expenseInput.value = "";
+                amountInput.value = "";
+                expenseInput.focus();
+            });
+
+            // Clear all expenses
+            clearBtn.addEventListener("click", () => {
+                expenses = [];
+                total = 0;
+                expenseList.innerHTML = "";
+                totalDisplay.textContent = `Total: $${total.toFixed(2)}`;
+                emptyList.classList.remove("hidden");
+                clearBtn.classList.add("hidden");
+                saveToLocalStorage();
+            });
+
+            // Initialize the app
+            loadFromLocalStorage();
+        });
+    </script>
+</body>
+</html>
